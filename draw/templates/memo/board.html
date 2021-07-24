@@ -1,0 +1,139 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>P4 Drawing</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static 'draw/vendor/bootstrap/css/bootstrap.min.css' %}">
+    <script type="text/javascript" src="{% static 'draw/vendor/jquery/jquery-3.3.1.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'draw/vendor/paper/paper-full.min.js' %}"></script>
+    <style type="text/css">
+    .outer-wrapper {
+        margin: auto 0;
+        text-align: center;
+        padding: 25px;
+    }
+    #main {
+        width: 70%;
+        height: 100vh;
+        margin: auto;
+        background-color: white;
+        display: block;
+        text-align: center;
+        padding: 50px;
+        border-radius: 15px;
+    }
+
+    #app-name {
+        color: black;
+        display: inline-block;
+    }
+
+    .main-btn {
+        height: 150px;
+        width: 90%;
+        background-color: #F8FAAB;
+        border-color: transparent;
+        color: black;
+        font-size: 32px;
+    }
+
+    .sub-btn {
+        height: 150px;
+        width: 40%;
+        font-size: 24px;
+        border-color: transparent;
+    }
+
+    .light {
+        background-color: #F8FAAB;
+        color: black;
+    }
+
+    .note-card:hover {
+        background-color: #dbdd97;
+    }
+
+    #back-btn, #back-btn-2, #back-btn-3 {
+        float: left;
+        font-size: 37px;
+    }
+
+    #note-container {
+        width: 100%;
+        max-width: 100vw;
+        height: 100%;
+        margin: 0 auto;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        position: relative;
+    }
+
+    #no-announcements {
+        margin-top: 30%;
+    }
+
+    #no-announcements-text {
+        font-size: 42px;
+        color: #c4c4c4;
+    }
+    </style>
+
+</head>
+<body>
+    <!-- You may change the dimensions of this canvas -->
+    <div class="outer-wrapper"> 
+        <h1>Announcements</h1>
+        <div id="note-container">
+            <div id="no-announcements">
+                <img src="https://image.flaticon.com/icons/png/512/1201/1201892.png" height="250" width="250"/>
+                <br/>
+                <br/>
+                <br/>
+                <h1 id="no-announcements-text">No Announcements yet</h1>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    var uid = Date.now() % 10000; // Use this to ID the user
+    var url = window.location.href;
+    var socket = new WebSocket(
+        'ws://' + window.location.host + '/ws/draw');
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    const params = Object.fromEntries(urlSearchParams.entries());
+    const winSize = params.size;
+    console.log(winSize);
+    var notes = [
+        {
+            id: 0,
+            header: 'hello',
+            content: 'Something',
+            uid: uid
+        }
+    ]
+
+    socket.onopen = function(event) {
+        console.log("connected!")
+    }
+    
+
+    socket.onmessage = function(receivedMessage) {
+        var received = JSON.parse(receivedMessage.data);
+        console.log("Received: " + JSON.stringify(received));
+        $('#no-announcements').hide()
+        let card = '<div onclick="cardClicked(this)"class="card light note-card" ' + ' style="width: 30%; height: 200px; float: left; margin: 5px;">' + '<div class="card-body">' + '<h5 class="card-title">' + received.header + '</h5>' + 
+                        '<p class="card-text">' + received.content + '</p>' + '</div>' + '</div>';
+        $('#note-container').append(card)
+    }
+
+    socket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+</script>
+</html>

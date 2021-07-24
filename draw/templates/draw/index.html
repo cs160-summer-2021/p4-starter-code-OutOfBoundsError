@@ -37,44 +37,60 @@
     const params = Object.fromEntries(urlSearchParams.entries());
     const winSize = params.size;
     console.log(winSize);
+    var lastWriter = undefined;
     tool.onMouseMove = function(event) { //http://paperjs.org/reference/tool/ path examples
         let userColor = "#" + randomColor
         //path.strokeColor = userColor;
        //path.add(event.point);
        // You may need to add code here if you want to pass any other information.
-       var data = {
-            x: event.point.x,
-            y: event.point.y,
-            uid: uid,
-            color: randomColor
-       };
-       //socket.send(JSON.stringify(data));
+        if (winSize == 'small') {
+            if (lastWriter != uid) {
+                path = new paper.Path();
+                path.strokeColor = '#' + randomColor;
+                path.add(event.point)
+            } else {
+                path.strokeColor = '#' + randomColor;
+                path.add(event.point);
+            }
+            lastWriter = uid
+            var data = {
+                x: event.point.x,
+                y: event.point.y,
+                uid: uid,
+                color: randomColor
+            };
+
+            socket.send(JSON.stringify(data));
+        }
+        
        //socket.send("{\"x\" : " + event.point.x + ", \"y\" : " + event.point.y + ", \"uid\" : " + uid  + "}" );
     }
-
+    /*
     tool.onMouseDown = function(event) {
-        path = new paper.Path();
-        path.strokeColor = '#' + randomColor;
-        var data = {
-            new_path: true,
-            uid: uid
+        if (winSize == 'small') {
+            path = new paper.Path();
+            path.strokeColor = '#' + randomColor;
+            var data = {
+                new_path: true,
+                uid: uid
+            }
+            socket.send(JSON.stringify(data));
         }
-        socket.send(JSON.stringify(data));
     }
 
     tool.onMouseDrag = function(event) {
-        path.strokeColor = '#' + randomColor;
-        path.add(event.point);
-        var data = {
-            x: event.point.x,
-            y: event.point.y,
-            uid: uid,
-            color: randomColor
-        };
-        socket.send(JSON.stringify(data));
-    }
-    
-
+        if (winSize == 'small') {
+            path.strokeColor = '#' + randomColor;
+            path.add(event.point);
+            var data = {
+                x: event.point.x,
+                y: event.point.y,
+                uid: uid,
+                color: randomColor
+            };
+            socket.send(JSON.stringify(data));
+        }
+    */
     socket.onopen = function(event) {
         console.log("connected!")
     }
@@ -83,6 +99,29 @@
         var received = JSON.parse(receivedMessage.data);
         console.log("Received: " + JSON.stringify(received));
         // You will probably want to add some code here to draw more lines.
+        //path = new paper.Path();
+
+        
+        if (winSize == 'large') {
+            if (received.uid != lastWriter ) {
+                path = new paper.Path();
+                let p = new paper.Point(received.x, received.y);
+                path.strokeColor = '#' + received.color
+                console.log('#' + received.color)
+                console.log('adding point.');
+                path.add(p)
+                lastWriter = received.uid
+            } else {
+                let p = new paper.Point(received.x, received.y);
+                console.log(p)
+                path.strokeColor = '#' + received.color
+                console.log('#' + received.color)
+                console.log('adding point.');
+                path.add(p)
+            }
+        }
+        
+        /*
         if (received.new_path != undefined && received.uid != undefined) {
             if (received.uid != uid && winSize == 'large') {
                 path = new paper.Path();
@@ -97,6 +136,8 @@
             }
 
         }
+        */
+        
     }
 
     socket.onclose = function(e) {

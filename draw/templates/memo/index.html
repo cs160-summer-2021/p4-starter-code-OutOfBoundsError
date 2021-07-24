@@ -1,0 +1,294 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>P4 Drawing</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static 'draw/vendor/bootstrap/css/bootstrap.min.css' %}">
+    <script type="text/javascript" src="{% static 'draw/vendor/jquery/jquery-3.3.1.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'draw/vendor/paper/paper-full.min.js' %}"></script>
+    <style type="text/css">
+    #main {
+        width: 100%;
+        height: 100vh;
+        margin: auto;
+        background-color: white;
+        display: block;
+        text-align: center;
+        padding: 50px;
+        border-radius: 15px;
+    }
+
+    #app-name {
+        color: black;
+        display: inline-block;
+        font-size: 64px;
+    }
+
+    .main-btn {
+        height: 200px;
+        width: 100%;
+        background-color: #F8FAAB;
+        border-color: transparent;
+        color: black;
+        font-size: 38px;
+    }
+
+    .sub-btn {
+        height: 150px;
+        width: 40%;
+        font-size: 24px;
+        border-color: transparent;
+    }
+
+    .light {
+        background-color: #F8FAAB;
+        color: black;
+    }
+
+    .note-card:hover {
+        background-color: #dbdd97;
+    }
+
+    #notes-data {
+        font-size: 28px;
+        height: 600px;
+
+    }
+
+    #back-btn, #back-btn-2, #back-btn-3 {
+        float: left;
+        font-size: 50px;
+    }
+
+    #title {
+        font-size: 38px;
+        text-align: left;
+    }
+
+    #note-text {
+        font-size: 24px;
+        text-align: left;
+    }
+
+    #ideas-container {
+        width: 100%;
+        margin: 0 auto;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        position: relative;
+    }
+    </style>
+
+</head>
+<body>
+    <!-- You may change the dimensions of this canvas -->
+    <div class="outer-wrapper">
+        <div id="main">
+            <div id="menu">
+                <h1 id="app-name">Notify</h1>
+                <br/>
+                <br/>
+                <a id="create-notes-btn"class="main-btn">
+                    <button type="button" class="btn btn-primary main-btn">Create notes</button>
+                </a>
+                <br/>
+                <br/>
+                <a id="see-notes-btn" class="main-btn">
+                    <button type="button" class="btn btn-primary main-btn">See notes</button>
+                </a>
+            </div>  
+
+            <div id="new-notes">
+                <a id="back-btn">
+                    <span id="back-btn" class="material-icons material-icons-outlined">
+                        arrow_back
+                    </span>
+                </a>
+                <h1 id="app-name">Create New Note</h1>
+                
+                
+                <br/>
+                <br/>
+                <input id="note-header" type="text" class="form-control light" placeholder="Note header" style="height: 100px; font-size: 32px;" >
+                <br/>
+                <textarea id="notes-data" class="form-control light" rows="10" placeholder="notes"></textarea>
+                <br/>
+                <br/>
+                <a id="save-btn" class="main-btn">
+                    <button type="button" class="btn btn-primary main-btn">Save</button>
+                </a>
+            </div>
+            
+            <div id="ideas">
+                <h1 id="app-name">Ideas</h1>
+                <a id="back-btn-2">
+                    <span id="back-btn" class="material-icons material-icons-outlined">
+                        arrow_back
+                    </span>
+                </a>
+                <div id="ideas-container">
+
+                </div>
+                <br/>
+                <br/>
+                
+                <br/>
+                <br/>
+                
+            </div>
+            
+
+            <div id="idea">
+                <h1 id="app-name">Ideas</h1>
+                <a id="back-btn-3">
+                    <span id="back-btn" class="material-icons material-icons-outlined">
+                        arrow_back
+                    </span>
+                </a>
+                <div id="idea-display">
+                    
+                </div>
+                
+                <br/>
+                <br/>
+                <a id="share-btn" class="main-btn">
+                    <button type="button" class="btn btn-primary sub-btn light">share</button>
+                </a>
+                <br/>
+                <br/>
+                
+                <br/>
+                <br/>
+                
+            </div>
+
+        </div>
+    </div>
+</body>
+<script>
+    var uid = Date.now() % 10000; // Use this to ID the user
+    var url = window.location.href;
+    var socket = new WebSocket(
+        'ws://' + window.location.host + '/ws/draw');
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    const params = Object.fromEntries(urlSearchParams.entries());
+    const winSize = params.size;
+    console.log(winSize);
+    var notes = [
+    ]
+
+    var selected = undefined
+    $('#ideas').hide()
+    $('#new-notes').hide()
+    $('#idea').hide()
+    $('#create-notes-btn').click(function(e) {
+        $('#menu').hide()
+        $('#ideas').hide()
+        $('#new-notes').show()
+    });
+
+    $('#see-notes-btn').click( function(e) {
+        $('#menu').hide()
+        $('#new-notes').hide()
+        $('#ideas').show(function() {
+            console.log('showing')
+            notes.forEach(note => {
+                if (!$('#note-' + note.id).length) {
+                    let card = '<div onclick="cardClicked(this)"class="card light note-card" ' + 'id="' + "note-" + note.id + '"' + ' style="width: 31%; height: 200px; float: left; margin: 5px;">' + '<div class="card-body">' + '<h5 id="title" class="card-title">' + note.header + '</h5>' + 
+                        '<p id="note-text" class="card-text">' + note.content + '</p>' + '</div>' + '</div>';
+                    console.log(card)
+                    $('#ideas').append(card)
+                }
+            });
+        });
+    });
+
+    function cardClicked(card) {
+        $('#idea-display').empty()
+        let c = $(card).clone()
+        c.removeClass('note-card')
+        let id = c.attr('id')
+        c.css('width', '90%')
+        c.css('height', '40vh')
+        c.css('margin-bottom', '1em')
+        // parse the id
+        let idsplit = id.split('-')
+        id = parseInt(idsplit[1])
+        //console.log(idsplit)
+        selected = id
+        $('#idea-display').append(c)
+        $('#idea').show()
+        $('#ideas').hide()
+    }
+
+    $('#back-btn-3').click(function(e) {
+        $('#menu').hide()
+        $('#new-notes').hide()
+        $('#ideas').show(function() {
+            console.log('showing')
+            notes.forEach(note => {
+                if (!$('#note-' + note.id).length) {
+                    let card = '<div onclick="cardClicked(this)"class="card light note-card" ' + 'id="' + "note-" + note.id + '"' + ' style="width: 18rem; height: 200px; float: left; margin-left: 1em; margin-top: 1em;">' + '<div class="card-body">' + '<h5 class="card-title">' + note.header + '</h5>' + 
+                        '<p class="card-text">' + note.content + '</p>' + '</div>' + '</div>';
+                    console.log(card)
+                    $('#ideas').append(card)
+                }
+            });
+        });
+        $('#idea').hide()
+    })
+
+    $('#back-btn').click(function(e) {
+        $('#menu').show()
+        $('#ideas').hide()
+        $('#new-notes').hide()
+    })
+
+    $('#back-btn-2').click(function(e) {
+        $('#menu').show()
+        $('#ideas').hide()
+        $('#new-notes').hide()
+    })
+
+    $('#save-btn').click(function(e) {
+        var data = {
+            id: notes.length,
+            header: $('#note-header').val(),
+            content: $('#notes-data').val(),
+            created_by: uid
+        }
+        notes.push(data)
+    })
+
+    $('#share-btn').click(function(e) {
+        // Send websocket.
+        if (selected != undefined) {
+            let data = notes[selected]
+            socket.send(JSON.stringify(data))
+        }
+    })
+
+
+    socket.onopen = function(event) {
+        console.log("connected!")
+    }
+    
+
+    socket.onmessage = function(receivedMessage) {
+        var received = JSON.parse(receivedMessage.data);
+        console.log("Received: " + JSON.stringify(received));
+        
+        
+    }
+
+    socket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+</script>
+</html>
