@@ -205,7 +205,7 @@
             console.log('showing')
             notes.forEach(note => {
                 if (!$('#note-' + note.id).length) {
-                    let card = '<div onclick="cardClicked(this)"class="card light note-card" ' + 'id="' + "note-" + note.id + '"' + ' style="width: 30%; min-height: 300px; float: left; margin: 5px;">' + '<div class="card-body">' + '<h5 id="title" class="card-title">' + note.header + '</h5>' + 
+                    let card = '<div onclick="cardClicked(this)"class="card light note-card" ' + 'id="' + "note-" + note.id + '"' + ' style="width: 48%; min-height: 400px; float: left; margin: 5px;">' + '<div class="card-body">' + '<h5 id="title" class="card-title">' + note.header + '</h5>' + 
                         '<p id="note-text" class="card-text">' + note.content + '</p>' + '</div>' + '</div>';
                     console.log(card)
                     $('#ideas').append(card)
@@ -239,7 +239,7 @@
             console.log('showing')
             notes.forEach(note => {
                 if (!$('#note-' + note.id).length) {
-                    let card = '<div onclick="cardClicked(this)"class="card light note-card" ' + 'id="' + "note-" + note.id + '"' + ' style="width: 30%; min-height: 300px; float: left; margin-left: 1em; margin-top: 1em;">' + '<div class="card-body">' + '<h5 class="card-title">' + note.header + '</h5>' + 
+                    let card = '<div onclick="cardClicked(this)"class="card light note-card" ' + 'id="' + "note-" + note.id + '"' + ' style="width: 50%; min-height: 300px; float: left; margin-left: 1em; margin-top: 1em;">' + '<div class="card-body">' + '<h5 class="card-title">' + note.header + '</h5>' + 
                         '<p class="card-text">' + note.content + '</p>' + '</div>' + '</div>';
                     console.log(card)
                     $('#ideas').append(card)
