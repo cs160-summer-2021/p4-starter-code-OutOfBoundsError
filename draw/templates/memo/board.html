@@ -4,13 +4,19 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>P4 Drawing</title>
+    <title>P4 Announcement board</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
     rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{% static 'draw/vendor/bootstrap/css/bootstrap.min.css' %}">
     <script type="text/javascript" src="{% static 'draw/vendor/jquery/jquery-3.3.1.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'draw/vendor/paper/paper-full.min.js' %}"></script>
     <style type="text/css">
+    body {
+        font-family: 'Montserrat';
+    }
     .outer-wrapper {
         margin: auto 0;
         text-align: center;
@@ -126,9 +132,11 @@
         var received = JSON.parse(receivedMessage.data);
         console.log("Received: " + JSON.stringify(received));
         $('#no-announcements').hide()
-        let card = '<div onclick="cardClicked(this)"class="card light note-card" ' + ' style="width: 30%; height: 200px; float: left; margin: 5px;">' + '<div class="card-body">' + '<h5 class="card-title">' + received.header + '</h5>' + 
+        if (received.header != undefined && received.content != undefined) {
+            let card = '<div onclick="cardClicked(this)"class="card light note-card" ' + ' style="width: 30%; height: 200px; float: left; margin: 5px;">' + '<div class="card-body">' + '<h5 class="card-title">' + received.header + '</h5>' + 
                         '<p class="card-text">' + received.content + '</p>' + '</div>' + '</div>';
-        $('#note-container').append(card)
+            $('#note-container').append(card)
+        }
     }
 
     socket.onclose = function(e) {
